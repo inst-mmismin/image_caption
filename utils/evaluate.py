@@ -62,8 +62,11 @@ def run_eval(clip, llm, projection, tokenizer, device, data_root, transform, max
             images = images.to(device)
             clip_feats = clip.encode_image(images, normalize=False)
             prefix = projection(clip_feats).unsqueeze(1)
+            # pad_token == eos_token일 때 attention_mask 넣어줘야 함 
+            prefix_mask = torch.ones(prefix.size(0), 1, device=device, dtype=torch.long)
             outputs = llm.generate(
                 inputs_embeds=prefix,
+                attention_mask=prefix_mask,
                 max_new_tokens=max_new_tokens,
                 pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
                 eos_token_id=tokenizer.eos_token_id,
