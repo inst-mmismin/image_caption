@@ -4,6 +4,7 @@ import sys
 sys.path.append("./ml-mobileclip")
 
 import torch
+from tqdm import tqdm
 
 from env import CLIP_CHECKPOINT, LLM_CHECKPOINT
 from utils.load import load_loader, load_step1_models, load_transform
@@ -46,7 +47,8 @@ def main():
     projection.train()
     for epoch in range(args.epochs):
         epoch_loss = 0.0
-        for batch_idx, batch in enumerate(train_loader):
+        pbar = tqdm(train_loader, desc=f"Epoch {epoch + 1}/{args.epochs}", unit="batch")
+        for batch_idx, batch in enumerate(pbar):
             images, captions_raw = batch
             images = images.to(device)
 
@@ -71,6 +73,7 @@ def main():
             if loss_contrastive_val is not None:
                 logger.add_scalar("train/loss_contrastive", loss_contrastive_val.item(), global_step)
             
+            pbar.set_postfix(loss=f"{loss.item():.4f}")
             global_step += 1
 
         avg_loss = epoch_loss / (batch_idx + 1)

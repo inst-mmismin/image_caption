@@ -5,6 +5,18 @@ if [ ! -d "ml-mobileclip" ]; then
     git clone https://github.com/apple/ml-mobileclip.git
 fi
 
+# open-clip 
+cd ml-mobileclip
+git clone https://github.com/mlfoundations/open_clip.git
+pushd open_clip
+git apply ../mobileclip2/open_clip_inference_only.patch
+cp -r ../mobileclip2/* ./src/open_clip/
+pip install -e .
+popd
+
+pip install git+https://github.com/huggingface/pytorch-image-models
+cd .. 
+
 # 만약 hf가 없으면 아래를 실행해서 설치
 if ! command -v hf &> /dev/null; then
     pip install -U "huggingface_hub"
@@ -24,6 +36,11 @@ fi
 # 만약 gdowndl 없으면 아래를 실행해서 설치
 if ! command -v gdown &> /dev/null; then
     pip install -U "gdown"
+fi
+
+# 만약 dataset 폴더가 없으면 생성
+if [ ! -d "./dataset" ]; then
+    mkdir -p ./dataset
 fi
 
 # Flickr8k 데이터셋 다운로드 
