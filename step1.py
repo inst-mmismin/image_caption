@@ -1,5 +1,9 @@
 import os
 import sys
+import warnings
+
+warnings.filterwarnings("ignore", category=FutureWarning, module="timm")
+warnings.filterwarnings("ignore", category=UserWarning, message=".*Overwriting.*")
 
 sys.path.append("./ml-mobileclip")
 
@@ -10,7 +14,7 @@ from env import CLIP_CHECKPOINT, LLM_CHECKPOINT
 from utils.load import load_loader, load_step1_models, load_transform
 from utils.parser import step1_train_parser
 from utils.step1_tools import train_step
-from utils.evaluate import run_eval
+from utils.evaluate import run_retrieval_eval
 from utils.tensorboard import TensorBoardLogger
 
 
@@ -41,7 +45,7 @@ def main():
     # Optimizer
     optimizer = torch.optim.AdamW(projection.parameters(), lr=args.learning_rate)
 
-    best_cider = -1.0
+    best_recall1 = -1.0
     global_step = 0
 
     # Train loop
@@ -81,25 +85,25 @@ def main():
         logger.add_scalar("train/loss_epoch", avg_loss, epoch)
         print(f"Epoch {epoch + 1}/{args.epochs} | Train Loss: {avg_loss:.4f}")
 
-        # 평가 및 저장 
-        cider = run_eval(clip, llm, projection, llm_tokenizer, device, args.root, transform)
-        if cider is not None:
-            logger.add_scalar("eval/cider", cider, epoch)
-            print(f"Epoch {epoch + 1}/{args.epochs} | CIDEr: {cider:.4f}")
+        # 평가
+        retrieval = run_retrieval_eval(clip, llm, projection, llm_tokenizer, device, args.root, transform)
+        if retrieval is not None:
+            logger.add_scalar("eval/mean_sim", retrieval["mean_sim"], epoch)
+            logger.add_scalar("eval/recall1", retrieval["recall1"], epoch)
+            logger.add_scalar("eval/recall5", retrieval["recall5"], epoch)
+            print(f"Epoch {epoch + 1}/{args.epochs} | Sim: {retrieval['mean_sim']:.4f} | R@1: {retrieval['recall1']:.4f} | R@5: {retrieval['recall5']:.4f}")
 
-            if cider > best_cider:
-                best_cider = cider
+            if retrieval["recall1"] > best_recall1:
+                best_recall1 = retrieval["recall1"]
                 torch.save(projection.state_dict(), proj_best_path)
-                print(f"  -> Best CIDEr! Saved to {proj_best_path}")
-
+                print(f"  -> Best R@1! Saved to {proj_best_path}")
+        
         projection.train()
 
     # 마지막 모델 저장
     torch.save(projection.state_dict(), proj_path)
     print(f"Projection 저장: {proj_path}")
-    
-    if best_cider > 0:
-        print(f"Best CIDEr: {best_cider:.4f} -> {proj_best_path}")
+    print(f"Best R@1: {best_recall1:.4f} -> {proj_best_path}")
 
     logger.close()
     print("Training done.")
