@@ -42,8 +42,11 @@ def main():
 
     transform = load_transform(args)
 
-    # Optimizer
+    # Optimizer & Scheduler
     optimizer = torch.optim.AdamW(projection.parameters(), lr=args.learning_rate)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer, T_max=args.epochs, eta_min=args.min_lr
+    )
 
     best_recall1 = -1.0
     global_step = 0
@@ -97,7 +100,9 @@ def main():
                 best_recall1 = retrieval["recall1"]
                 torch.save(projection.state_dict(), proj_best_path)
                 print(f"  -> Best R@1! Saved to {proj_best_path}")
-        
+
+        scheduler.step()
+        logger.add_scalar("train/lr", scheduler.get_last_lr()[0], epoch)
         projection.train()
 
     # 마지막 모델 저장

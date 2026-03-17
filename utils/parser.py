@@ -7,6 +7,8 @@ def step1_train_parser():
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--learning_rate", type=float, default=1e-3)
+    parser.add_argument("--min_lr", type=float, default=1e-6,
+                        help="Cosine annealing 최소 learning rate (eta_min)")
 
     # 로깅 세팅
     parser.add_argument("--log_dir", type=str, default="./runs",
