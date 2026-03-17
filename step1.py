@@ -20,6 +20,7 @@ def main():
     print(f"Using device: {device}")
 
     logger = TensorBoardLogger(step="step1", log_dir_base=args.log_dir)
+    logger.save_args(args)
     ckpt_dir = logger.get_checkpoint_dir()
     
     proj_path = os.path.join(ckpt_dir, "projection_last.pt")
