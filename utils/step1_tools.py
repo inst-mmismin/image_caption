@@ -1,5 +1,6 @@
-import torch 
+import torch
 from module.loss import contrastive_loss, lm_loss
+from env import CAPTION_PROMPT
 
 # Caption을 입력해서 전체 텍스트의 맥력을 담고 있는 마지막 Hidden state를 반환 
 # 해당 정보가 이미지의 feature와 비교되어 Contrastive loss 계산에 사용됨 
@@ -57,7 +58,14 @@ def train_step(
 
     # LM loss
     if args.use_lm:
+        batch_size = caption_ids.size(0)
         prefix_embeds = projected_img.unsqueeze(1)
+        prompt_ids = llm_tokenizer(
+            CAPTION_PROMPT,
+            return_tensors="pt",
+            add_special_tokens=False,
+        ).input_ids.to(device)
+        prompt_embeds = llm.get_input_embeddings()(prompt_ids).expand(batch_size, -1, -1)
         loss_lm = lm_loss(
             llm=llm,
             input_embeds=prefix_embeds,
@@ -65,6 +73,7 @@ def train_step(
             attention_mask=attention_mask,
             llm_embed_layer=llm.get_input_embeddings(),
             device=device,
+            prompt_embeds=prompt_embeds,
         )
         
         total_loss = total_loss + args.weight_lm * loss_lm

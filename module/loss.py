@@ -22,19 +22,22 @@ def contrastive_loss(image_features, text_features, temperature):
 
 
 # Causal LM loss
-# LM 입력 : [image_prefix] + [caption] 
-# 이미지 조건하에 생성되는 caption의 loss 계산 
-def lm_loss(llm, input_embeds, caption_ids, attention_mask, llm_embed_layer, device):
+# LM 입력 : [image_prefix] + [prompt_embed] + [caption]
+# prompt_embed가 None이면 [image_prefix] + [caption] 
+def lm_loss(llm, input_embeds, caption_ids, attention_mask, llm_embed_layer, device, prompt_embeds=None):
     batch_size = input_embeds.size(0)
     num_prefix = input_embeds.size(1)
 
     # 텍스트 임베딩
     caption_embeds = llm_embed_layer(caption_ids)  # (B, seq_len, D)
-
     input_embeds = input_embeds.to(caption_embeds.dtype) # float32 -> bfloat16
 
-    # 전체 임베딩 생성 (Concatenate: [prefix | caption])
-    inputs_embeds = torch.cat([input_embeds, caption_embeds], dim=1)  # (B, num_prefix + seq_len, D)
+    # [prefix | (prompt) | caption]
+    if prompt_embeds is not None:
+        inputs_embeds = torch.cat([input_embeds, prompt_embeds, caption_embeds], dim=1)
+        num_prefix = num_prefix + prompt_embeds.size(1)
+    else:
+        inputs_embeds = torch.cat([input_embeds, caption_embeds], dim=1)
 
     # 이미지 prefix를 과려한 attention_mask 생성 
     prefix_mask = torch.ones(batch_size, num_prefix, device=device, dtype=attention_mask.dtype)
