@@ -1,4 +1,4 @@
-python step1.py --epochs 100 \
+python step1.py --epochs 20 \
                 --learning_rate 0.01 \
                 --min_lr 0.0001 \
                 --batch_size 512 \
@@ -6,7 +6,7 @@ python step1.py --epochs 100 \
                 --proj_type linear \
                 --use_layer_norm 
 
-python step1.py --epochs 100 \
+python step1.py --epochs 20 \
                 --learning_rate 0.01 \
                 --min_lr 0.0001 \
                 --batch_size 512 \
@@ -14,7 +14,7 @@ python step1.py --epochs 100 \
                 --proj_type mlp \
                 --use_layer_norm 
 
-python step1.py --epochs 100 \
+python step1.py --epochs 20 \
                 --learning_rate 0.01 \
                 --min_lr 0.0001 \
                 --batch_size 512 \
@@ -23,7 +23,7 @@ python step1.py --epochs 100 \
                 --proj_type mlp \
                 --use_layer_norm 
 
-python step1.py --epochs 100 \
+python step1.py --epochs 20 \
                 --learning_rate 0.01 \
                 --min_lr 0.0001 \
                 --batch_size 512 \
@@ -33,7 +33,7 @@ python step1.py --epochs 100 \
                 --use_layer_norm 
 
 
-python step1.py --epochs 100 \
+python step1.py --epochs 20 \
                 --learning_rate 0.01 \
                 --min_lr 0.0001 \
                 --batch_size 512 \
