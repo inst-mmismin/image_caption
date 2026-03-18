@@ -1,10 +1,21 @@
-import mobileclip
+import json
+import os
 
+import mobileclip
+import torch
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import LoraConfig, get_peft_model, TaskType
 
 from module.projection import load_proj
+
+# step1 의 args.json 로드
+def load_step1_args_from_ckpt(projection_ckpt_path):
+    run_dir = os.path.dirname(os.path.dirname(os.path.abspath(projection_ckpt_path)))
+    args_path = os.path.join(run_dir, "args.json")
+    with open(args_path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 def load_clip(checkpoint_path, with_freeze = False):
     clip, _, preprocess = mobileclip.create_model_and_transforms('mobileclip_b',
@@ -62,5 +73,29 @@ def load_step1_models(clip_checkpoint, llm_checkpoint, args, device):
     clip, _, _ = load_clip(clip_checkpoint, with_freeze=True)
     llm, llm_tokenizer = load_llm(llm_checkpoint, with_freeze=True)
     projection = load_proj(args.proj_type, use_layer_norm=args.use_layer_norm).to(device)
+
+    return clip.to(device), llm.to(device), llm_tokenizer, projection.to(device)
+
+
+def load_step2_models(clip_checkpoint, llm_checkpoint, projection_ckpt_path, args, device): 
+    step1_args = load_step1_args_from_ckpt(projection_ckpt_path) 
+    proj_type = step1_args["proj_type"] 
+    use_layer_norm = step1_args.get("use_layer_norm", False) 
+
+    clip, _, _ = load_clip(clip_checkpoint, with_freeze=not args.no_freeze_clip) 
+    llm, llm_tokenizer = load_llm(llm_checkpoint, with_freeze=False) 
+    projection = load_proj(proj_type, use_layer_norm=use_layer_norm) 
+    projection.load_state_dict(torch.load(projection_ckpt_path, map_location=device)) 
+
+    if not args.freeze_llm:
+        lora_config = LoraConfig(
+            r=args.lora_r,
+            lora_alpha=args.lora_alpha,
+            lora_dropout=args.lora_dropout,
+            task_type=TaskType.CAUSAL_LM,
+            target_modules=[m.strip() for m in args.lora_target_modules.split(",")],
+        )
+        llm = get_peft_model(llm, lora_config)
+        llm.print_trainable_parameters()
 
     return clip.to(device), llm.to(device), llm_tokenizer, projection.to(device)
