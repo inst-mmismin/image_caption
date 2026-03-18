@@ -61,6 +61,6 @@ def load_loader(root, args, split=None):
 def load_step1_models(clip_checkpoint, llm_checkpoint, args, device):
     clip, _, _ = load_clip(clip_checkpoint, with_freeze=True)
     llm, llm_tokenizer = load_llm(llm_checkpoint, with_freeze=True)
-    projection = load_proj(args.proj_type).to(device)
+    projection = load_proj(args.proj_type, use_layer_norm=args.use_layer_norm).to(device)
 
     return clip.to(device), llm.to(device), llm_tokenizer, projection.to(device)

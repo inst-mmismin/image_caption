@@ -35,5 +35,7 @@ def step1_train_parser():
                         help="LM loss 가중치")
     parser.add_argument("--contra_temp", type=float, default=0.07,
                         help="logit 분포 스케일링 파라미터")
+    parser.add_argument("--use_layer_norm", action="store_true", default=False,
+                        help="Projection 내 LayerNorm 사용 여부")
 
     return parser.parse_args()
