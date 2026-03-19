@@ -1,4 +1,22 @@
+# Core
+numpy==2.0.2
+pillow==11.3.0
+
+# PyTorch
+torch==2.8.0
+torchvision==0.23.0
+
+# Transformers & PEFT
+transformers==4.57.0
+peft==0.17.1
+accelerate==1.10.1
+
+# Evaluation & Utils
 pycocoevalcap
 tensorboard
 tqdm
 timm
+
+# Setup 시 필요 (setup.sh)
+huggingface_hub
+gdown
