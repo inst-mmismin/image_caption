@@ -6,6 +6,7 @@ if [ ! -d "ml-mobileclip" ]; then
 fi
 
 # open-clip 
+# 만약 python 실행해서 import 
 cd ml-mobileclip
 git clone https://github.com/mlfoundations/open_clip.git
 pushd open_clip
@@ -59,5 +60,7 @@ if [ ! -f "./dataset/flickr30k" ]; then
     gdown 13BqdvAv5-dXmQczeIEfAlKj0w4WjeUdC -O ./dataset/flickr30k.zip
     unzip -qq ./dataset/flickr30k.zip -d ./dataset/flickr30k
     rm ./dataset/flickr30k.zip
+    mv dataset/flickr30k/Flickr30k/* dataset/flickr30k
+    rm -r dataset/flickr30k/Flickr30k
 fi
 
