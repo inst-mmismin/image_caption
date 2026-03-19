@@ -38,6 +38,7 @@ pip install -r requirements.txt
 - ml-mobileclip 클론 및 open_clip 설정
 - MobileCLIP-B, SmolLM2-135M-Instruct 모델 다운로드
 - Flickr8k, Flickr30k 데이터셋 다운로드 및 분할
+- Step2 학습 체크포인트 다운로드 
 
 ```
  setup.sh

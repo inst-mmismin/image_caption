@@ -64,3 +64,12 @@ if [ ! -f "./dataset/flickr30k" ]; then
     rm -r dataset/flickr30k/Flickr30k
 fi
 
+
+# 사전 학습 모델 다운로드 
+if [ ! -d "runs/step2/20260318_213742" ]; then
+    mkdir -p runs/step2
+    gdown 1VIz7RmPRDJR7vdA9wrMtj5HaFifPQJXN -O step2_pretrained.zip
+    unzip -q step2_pretrained.zip
+    rm step2_pretrained.zip
+fi
+
