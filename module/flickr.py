@@ -29,6 +29,10 @@ class Flickr8k(Dataset):
         
         assert all(img in self.captions for img in self.images), "일부 이미지에 캡션이 없습니다"
 
+    def get_refs(self):
+        # 평가용 참조 캡션. {image_id: [cap1, cap2, ...]} 
+        return {img: self.captions[img] for img in self.images}
+
     def __len__(self):
         return len(self.images)
 

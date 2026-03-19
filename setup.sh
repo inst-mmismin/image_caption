@@ -53,3 +53,11 @@ fi
 
 pip install -r requirements.txt
 python misc/split_flickr8k.py 
+
+# Flickr30k 데이터셋 다운로드 
+if [ ! -f "./dataset/flickr30k" ]; then
+    gdown 13BqdvAv5-dXmQczeIEfAlKj0w4WjeUdC -O ./dataset/flickr30k.zip
+    unzip -qq ./dataset/flickr30k.zip -d ./dataset/flickr30k
+    rm ./dataset/flickr30k.zip
+fi
+

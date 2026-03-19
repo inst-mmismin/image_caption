@@ -12,7 +12,7 @@ from tqdm import tqdm
 from accelerate import Accelerator
 
 from env import CLIP_CHECKPOINT, LLM_CHECKPOINT
-from utils.load import load_loader, load_step2_models, load_transform
+from utils.load import load_loader, load_step2_models, load_transform, _get_projection_config
 from utils.parser import step2_train_parser
 from utils.step2_tools import train_step
 from utils.evaluate import run_cider_eval
@@ -34,6 +34,7 @@ def main():
 
     logger = TensorBoardLogger(step="step2", log_dir_base=args.log_dir)
     if accelerator.is_main_process:
+        args.proj_type, args.use_layer_norm = _get_projection_config(args.projection_ckpt)
         logger.save_args(args)
     ckpt_dir = logger.get_checkpoint_dir()
 
