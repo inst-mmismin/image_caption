@@ -10,6 +10,7 @@ sys.path.append("./ml-mobileclip")
 
 import torch
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from env import CAPTION_PROMPT
 from utils.load import load_inference_models
@@ -39,7 +40,7 @@ def generate_captions(clip, llm, projection, tokenizer, loader, device, max_new_
 
     hyps = {}
     with torch.no_grad():
-        for images, image_ids in loader:
+        for images, image_ids in tqdm(loader, desc="캡션 생성", unit="batch"):
             images = images.to(device)
             clip_feats = clip.encode_image(images, normalize=False)
             img_prefix = projection(clip_feats).unsqueeze(1)
